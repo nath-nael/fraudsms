@@ -720,7 +720,7 @@
         <div class="notif-container" id="notif-container">
 
             <!-- Notif Video Call -->
-            <div class="notif-card" id="notif-vc">
+            <div class="notif-card" id="notif-vc"  onclick="acceptVC(event)">
                 <div class="notif-app-icon notif-icon-vc">📹</div>
                 <div class="notif-content">
                     <div class="notif-app-name">Video Call Masuk</div>
@@ -982,6 +982,7 @@
         if (e.target.closest('#secret-zone-chat')) return;
         if (e.target.closest('.chat-back')) return;
         if (e.target.closest('.claim-link')) return;
+        if (state === 3 || state === 4) return;
 
         if (state === 1) {
             showScamBubble();
@@ -1041,17 +1042,23 @@
 
     // ===== TERIMA VIDEO CALL =====
     function acceptVC(e) {
-        e.stopPropagation();
-        const notifVC = document.getElementById('notif-vc');
-        notifVC.classList.remove('visible');
-        setTimeout(() => {
-            notifVC.style.display = 'none';
-            showScreen('screen-videocall');
-            startVCTimer();
-            state = 4;
-            setHint('----------------------------');
-        }, 300);
-    }
+    e.stopPropagation();
+    e.preventDefault();
+
+    // Jangan proses kalau bukan state 3
+    if (state !== 3) return;
+
+    state = 4; // Set dulu sebelum apapun
+
+    const notifVC = document.getElementById('notif-vc');
+    notifVC.classList.remove('visible');
+
+    setTimeout(() => {
+        notifVC.style.display = 'none';
+        showScreen('screen-videocall');
+        startVCTimer();
+    }, 300);
+}
 
     // ===== VC TIMER =====
     function startVCTimer() {
