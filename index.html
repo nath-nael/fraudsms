@@ -963,14 +963,12 @@
     function backToList() {
         showScreen('screen-sms-list');
         state = 0;
-        setHint('----------------------------');
     }
 
     // ===== OPEN CHAT =====
     function openChat() {
         showScreen('screen-sms-chat');
         state = 1;
-        setHint('----------------------------');
         const item = document.getElementById('item-hadiah');
         item.classList.remove('unread');
         item.querySelector('.unread-dot')?.remove();
@@ -1027,7 +1025,6 @@
         const notifVC = document.getElementById('notif-vc');
         notifVC.classList.add('visible');
         state = 3;
-        setHint('----------------------------');
     }
 
     // ===== TOLAK VIDEO CALL =====
@@ -1037,7 +1034,6 @@
         notifVC.classList.remove('visible');
         setTimeout(() => { notifVC.style.display = 'none'; }, 400);
         state = 5;
-        setHint('----------------------------');
     }
 
     // ===== TERIMA VIDEO CALL =====
@@ -1084,7 +1080,6 @@
         clearInterval(vcTimerInterval);
         showScreen('screen-sms-chat');
         state = 5;
-        setHint('----------------------------');
     }
 
     // ===== KLIK LINK CLAIM =====
@@ -1109,7 +1104,6 @@
                 <span class="btime">09:40</span>`;
             body.appendChild(b);
             body.scrollTop = body.scrollHeight;
-            setHint('----------------------------');
         }, 3500);
     }
 
@@ -1127,21 +1121,18 @@
         tx1.classList.add('visible');
         setTimeout(() => { tx2.classList.add('visible'); }, 1300);
 
-        setHint('----------------------------');
     }
 
     // ===== GO TO BANK =====
     function goToBank(e) {
         e.stopPropagation();
         showScreen('screen-bank');
-        setHint('----------------------------');
         document.getElementById('screen-bank').addEventListener('click', showWarning, { once: true });
     }
 
     // ===== WARNING =====
     function showWarning() {
         document.getElementById('warning-overlay').classList.add('show');
-        setHint('----------------------------');
     }
 
     function closeWarning() {
@@ -1184,7 +1175,6 @@
         }
 
         showScreen('screen-sms-list');
-        setHint('----------------------------');
     }
 </script>
 </body>
