@@ -634,7 +634,7 @@
 </head>
 <body>
 
-<div id="hint">📱 Klik pada layar HP untuk mulai simulasi</div>
+<div id="hint">------------------------</div>
 
 <!-- ===== PHONE ===== -->
 <div class="phone-frame" id="phone">
@@ -919,14 +919,14 @@
     // ===== BACK TO LIST =====
     function backToList() {
         showScreen('screen-sms-list');
-        setHint('📋 Daftar SMS — klik "Hadiah Spesial" untuk buka pesan');
+        setHint('------------------------');
     }
 
     // ===== OPEN CHAT =====
     function openChat() {
         showScreen('screen-sms-chat');
         chatStep = 1;
-        setHint('💬 Chat terbuka — klik layar untuk lihat pesan masuk');
+        setHint('------------------------');
 
         // Tandai sudah dibaca di list
         const item = document.getElementById('item-hadiah');
@@ -942,7 +942,7 @@
         if (chatStep === 1) {
             showScamBubble();
             chatStep = 2;
-            setHint('🔗 Pesan masuk! Klik link "claim disini" di dalam pesan');
+            setHint('------------------------');
         }
     });
 
@@ -1004,7 +1004,7 @@
                 <span class="btime">09:40</span>`;
             body.appendChild(b);
             body.scrollTop = body.scrollHeight;
-            setHint('📲 Aplikasi terunduh — klik pojok kanan bawah layar untuk lanjut');
+            setHint('------------------------');
         }, 3500);
     }
 
@@ -1028,14 +1028,14 @@
             tx2.classList.add('visible');
         }, 1300);
 
-        setHint('🔔 Notifikasi transaksi muncul! Klik salah satu untuk lihat saldo');
+        setHint('------------------------');
     }
 
     // ===== GO TO BANK =====
     function goToBank(e) {
         e.stopPropagation();
         showScreen('screen-bank');
-        setHint('🏦 Saldo Rp 0 — klik layar untuk pesan edukasi');
+        setHint('');
 
         // Klik di bank screen → warning
         document.getElementById('screen-bank').addEventListener('click', showWarning, { once: true });
