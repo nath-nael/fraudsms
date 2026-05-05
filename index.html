@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulasi Penipuan - Sosialisasi</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #1a1a2e;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        /* ===== PHONE FRAME ===== */
+        .phone-frame {
+            width: 360px;
+            height: 760px;
+            background: #000;
+            border-radius: 48px;
+            border: 8px solid #2a2a2a;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 80px rgba(0,0,0,0.9), 0 0 0 1px #444, inset 0 0 30px rgba(255,255,255,0.03);
+        }
+
+        .phone-notch {
+            width: 120px;
+            height: 26px;
+            background: #000;
+            border-radius: 0 0 18px 18px;
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 999;
+        }
+
+        /* ===== STATUS BAR ===== */
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 22px 6px;
+            font-size: 11px;
+            font-weight: 700;
+            position: relative;
+            z-index: 50;
+            flex-shrink: 0;
+        }
+
+        .status-bar.dark { background: #f5f5f5; color: #000; }
+        .status-bar.light { background: transparent; color: #fff; }
+
+        .status-time { font-size: 13px; font-weight: 800; }
+        .status-icons { display: flex; gap: 4px; align-items: center; font-size: 12px; }
+
+        /* ===== SCREENS ===== */
+        .screen {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0; left: 0;
+            display: none;
+            flex-direction: column;
+            transition: opacity 0.3s ease;
+        }
+        .screen.active { display: flex; }
+
+        /* ============================================================
+           SCREEN 1 — DAFTAR SMS
+        ============================================================ */
+        #screen-sms-list {
+            background: #f5f5f5;
+        }
+
+        .sms-list-header {
+            background: #fff;
+            padding: 44px 18px 14px;
+            border-bottom: 1px solid #e5e5e5;
+            flex-shrink: 0;
+        }
+
+        .sms-list-header h2 {
+            font-size: 22px;
+            font-weight: 800;
+            color: #000;
+        }
+
+        .sms-search {
+            margin-top: 10px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            padding: 8px 14px;
+            font-size: 13px;
+            color: #aaa;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sms-list-body {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .sms-list-item {
+            background: #fff;
+            padding: 14px 18px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            cursor: pointer;
+            transition: background 0.15s;
+            position: relative;
+        }
+
+        .sms-list-item:active { background: #f5f5f5; }
+
+        .sms-list-item.unread .sms-list-name { font-weight: 800; }
+        .sms-list-item.unread .sms-list-preview { font-weight: 600; color: #333; }
+
+        .sms-list-avatar {
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .avatar-gift { background: linear-gradient(135deg, #ff6b35, #ffd166); }
+        .avatar-bank { background: linear-gradient(135deg, #003087, #0070ba); }
+        .avatar-telco { background: linear-gradient(135deg, #e63946, #f4a261); }
+        .avatar-friend { background: linear-gradient(135deg, #2ec4b6, #cbf3f0); }
+
+        .sms-list-content { flex: 1; min-width: 0; }
+        .sms-list-name { font-size: 14px; font-weight: 600; color: #000; }
+        .sms-list-preview {
+            font-size: 12px;
+            color: #888;
+            margin-top: 3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .sms-list-meta {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 5px;
+            flex-shrink: 0;
+        }
+
+        .sms-list-time { font-size: 11px; color: #aaa; }
+
+        .unread-dot {
+            width: 9px;
+            height: 9px;
+            background: #007AFF;
+            border-radius: 50%;
+        }
+
+        /* ============================================================
+           SCREEN 2 — CHAT SMS
+        ============================================================ */
+        #screen-sms-chat {
+            background: #f5f5f5;
+        }
+
+        .chat-header {
+            background: #fff;
+            padding: 44px 14px 12px;
+            border-bottom: 1px solid #e5e5e5;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+
+        .chat-back {
+            font-size: 22px;
+            color: #007AFF;
+            cursor: pointer;
+            padding: 4px 6px;
+            font-weight: 300;
+        }
+
+        .chat-header-avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 17px;
+            flex-shrink: 0;
+        }
+
+        .chat-header-info h3 { font-size: 15px; font-weight: 700; color: #000; }
+        .chat-header-info span { font-size: 11px; color: #888; }
+
+        .chat-body {
+            flex: 1;
+            padding: 16px 14px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .chat-date-label {
+            text-align: center;
+            font-size: 11px;
+            color: #aaa;
+            background: rgba(0,0,0,0.06);
+            padding: 4px 12px;
+            border-radius: 10px;
+            align-self: center;
+        }
+
+        .bubble {
+            max-width: 78%;
+            padding: 10px 14px;
+            border-radius: 18px;
+            font-size: 13px;
+            line-height: 1.55;
+            animation: bubbleIn 0.3s ease;
+        }
+
+        @keyframes bubbleIn {
+            from { opacity: 0; transform: translateY(8px) scale(0.96); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .bubble.received {
+            background: #fff;
+            color: #000;
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+        }
+
+        .bubble.sent {
+            background: #007AFF;
+            color: #fff;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+
+        .bubble .btime {
+            font-size: 10px;
+            opacity: 0.55;
+            margin-top: 5px;
+            display: block;
+            text-align: right;
+        }
+
+        .claim-link {
+            color: #007AFF;
+            text-decoration: underline;
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            padding: 11px 14px;
+            background: #fff;
+            border-radius: 18px;
+            border-bottom-left-radius: 4px;
+            align-self: flex-start;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+        }
+
+        .typing-dot {
+            width: 7px; height: 7px;
+            background: #bbb;
+            border-radius: 50%;
+            animation: tdot 1.2s infinite;
+        }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes tdot {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+            30% { transform: translateY(-5px); opacity: 1; }
+        }
+
+        /* ============================================================
+           NOTIFICATIONS
+        ============================================================ */
+        .notif-container {
+            position: absolute;
+            top: 50px;
+            left: 10px;
+            right: 10px;
+            z-index: 800;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            pointer-events: none;
+        }
+
+        .notif-card {
+            background: rgba(255,255,255,0.96);
+            backdrop-filter: blur(20px);
+            border-radius: 14px;
+            padding: 12px 14px;
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            box-shadow: 0 6px 24px rgba(0,0,0,0.18);
+            transform: translateY(-120px);
+            opacity: 0;
+            transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
+            pointer-events: all;
+            cursor: pointer;
+        }
+
+        .notif-card.visible {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .notif-app-icon {
+            width: 36px; height: 36px;
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .notif-icon-dl { background: linear-gradient(135deg, #34c759, #30d158); }
+        .notif-icon-bank { background: linear-gradient(135deg, #003087, #0070ba); }
+
+        .notif-content { flex: 1; min-width: 0; }
+        .notif-app-name { font-size: 10px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
+        .notif-title { font-size: 13px; font-weight: 700; color: #000; margin-top: 1px; }
+        .notif-body { font-size: 12px; color: #555; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        .notif-time { font-size: 10px; color: #bbb; align-self: flex-start; flex-shrink: 0; }
+
+        /* Download progress inside notif */
+        .dl-progress {
+            height: 3px;
+            background: #e0e0e0;
+            border-radius: 2px;
+            margin-top: 7px;
+            overflow: hidden;
+        }
+        .dl-bar {
+            height: 100%;
+            background: #34c759;
+            border-radius: 2px;
+            width: 0%;
+            transition: width 3s linear;
+        }
+
+        /* ============================================================
+           SCREEN 3 — BANK
+        ============================================================ */
+        #screen-bank {
+            background: #f0f4ff;
+        }
+
+        .bank-top {
+            background: linear-gradient(160deg, #002d72 0%, #0057b8 100%);
+            padding: 44px 20px 24px;
+            flex-shrink: 0;
+        }
+
+        .bank-topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 22px;
+        }
+
+        .bank-logo-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .bank-logo-box {
+            width: 30px; height: 30px;
+            background: #fff;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+        }
+
+        .bank-logo-wrap span {
+            font-size: 16px;
+            font-weight: 900;
+            color: #fff;
+            letter-spacing: 1px;
+        }
+
+        .bank-topbar-icons { display: flex; gap: 14px; font-size: 20px; }
+
+        .bank-greeting-text { font-size: 12px; color: rgba(255,255,255,0.7); }
+        .bank-user-name { font-size: 19px; font-weight: 800; color: #fff; margin-top: 2px; }
+
+        .balance-card {
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.18);
+            border-radius: 18px;
+            padding: 18px 20px;
+            margin-top: 16px;
+            backdrop-filter: blur(10px);
+        }
+
+        .balance-label-text {
+            font-size: 12px;
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .balance-eye { font-size: 16px; cursor: pointer; }
+
+        .balance-amount-big {
+            font-size: 34px;
+            font-weight: 900;
+            color: #ff453a;
+            letter-spacing: -1px;
+        }
+
+        .balance-sub {
+            font-size: 11px;
+            color: rgba(255,255,255,0.55);
+            margin-top: 6px;
+        }
+
+        .balance-sub span { color: rgba(255,255,255,0.8); font-weight: 600; }
+
+        .bank-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 16px;
+        }
+
+        .bank-quick-menu {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 22px;
+        }
+
+        .bqm-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .bqm-icon {
+            width: 50px; height: 50px;
+            background: #fff;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+        }
+
+        .bqm-item p { font-size: 10px; color: #666; font-weight: 500; text-align: center; }
+
+        .section-title {
+            font-size: 15px;
+            font-weight: 800;
+            color: #111;
+            margin-bottom: 12px;
+        }
+
+        .tx-list { display: flex; flex-direction: column; gap: 10px; }
+
+        .tx-item {
+            background: #fff;
+            border-radius: 14px;
+            padding: 13px 15px;
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+        }
+
+        .tx-ico {
+            width: 40px; height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .tx-ico.out { background: #fff0f0; }
+        .tx-ico.inc { background: #f0fff4; }
+
+        .tx-detail { flex: 1; }
+        .tx-detail h4 { font-size: 13px; font-weight: 700; color: #111; }
+        .tx-detail p { font-size: 11px; color: #999; margin-top: 2px; }
+        .tx-val { font-size: 14px; font-weight: 800; }
+        .tx-val.out { color: #ff3b30; }
+        .tx-val.inc { color: #34c759; }
+
+        /* ============================================================
+           WARNING OVERLAY
+        ============================================================ */
+        #warning-overlay {
+            display: none;
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.88);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            padding: 24px;
+        }
+
+        #warning-overlay.show { display: flex; }
+
+        .warning-box {
+            background: #fff;
+            border-radius: 22px;
+            padding: 28px 22px;
+            text-align: center;
+            animation: warnIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes warnIn {
+            from { opacity: 0; transform: scale(0.75); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .warn-icon { font-size: 52px; margin-bottom: 12px; }
+        .warn-title { font-size: 20px; font-weight: 900; color: #ff3b30; margin-bottom: 10px; }
+        .warn-body { font-size: 13px; color: #333; line-height: 1.65; margin-bottom: 20px; }
+        .warn-body strong { color: #000; }
+
+        .warn-tips {
+            background: #fff5f5;
+            border-radius: 12px;
+            padding: 12px 14px;
+            margin-bottom: 18px;
+            text-align: left;
+        }
+
+        .warn-tips p {
+            font-size: 12px;
+            color: #c0392b;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .warn-tips ul {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .warn-tips ul li {
+            font-size: 12px;
+            color: #555;
+            display: flex;
+            gap: 6px;
+        }
+
+        .warn-btn {
+            background: linear-gradient(135deg, #ff3b30, #c0392b);
+            color: #fff;
+            border: none;
+            padding: 14px;
+            border-radius: 14px;
+            font-size: 14px;
+            font-weight: 800;
+            cursor: pointer;
+            width: 100%;
+            letter-spacing: 0.3px;
+        }
+
+        /* ============================================================
+           STEP HINT (pojok layar untuk presenter)
+        ============================================================ */
+        #hint {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255,255,255,0.12);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #fff;
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            white-space: nowrap;
+            z-index: 1000;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        /* Secret tap zone */
+        #secret-zone {
+            position: absolute;
+            bottom: 0; right: 0;
+            width: 50px; height: 50px;
+            z-index: 700;
+            cursor: default;
+        }
+    </style>
+</head>
+<body>
+
+<div id="hint">📱 Klik pada layar HP untuk mulai simulasi</div>
+
+<!-- ===== PHONE ===== -->
+<div class="phone-frame" id="phone">
+    <div class="phone-notch"></div>
+
+    <!-- ============================================================
+         SCREEN 1 — DAFTAR SMS
+    ============================================================ -->
+    <div id="screen-sms-list" class="screen active">
+        <div class="status-bar dark">
+            <span class="status-time" id="clock1">09:41</span>
+            <div class="status-icons"><span>▲</span><span>WiFi</span><span>🔋</span></div>
+        </div>
+
+        <div class="sms-list-header">
+            <h2>Pesan</h2>
+            <div class="sms-search">🔍 &nbsp;Cari</div>
+        </div>
+
+        <div class="sms-list-body">
+            <!-- Item 1 — HADIAH SPESIAL (unread, akan diklik) -->
+            <div class="sms-list-item unread" id="item-hadiah" onclick="openChat()">
+                <div class="sms-list-avatar avatar-gift">🎁</div>
+                <div class="sms-list-content">
+                    <div class="sms-list-name">Hadiah Spesial</div>
+                    <div class="sms-list-preview">Selamat! Anda terpilih sebagai pemenang...</div>
+                </div>
+                <div class="sms-list-meta">
+                    <span class="sms-list-time">09:38</span>
+                    <div class="unread-dot"></div>
+                </div>
+            </div>
+
+            <!-- Item 2 — Bank -->
+            <div class="sms-list-item">
+                <div class="sms-list-avatar avatar-bank">🏦</div>
+                <div class="sms-list-content">
+                    <div class="sms-list-name">MyBank Digital</div>
+                    <div class="sms-list-preview">Transaksi Anda sebesar Rp 150.000 berhasil</div>
+                </div>
+                <div class="sms-list-meta">
+                    <span class="sms-list-time">Kemarin</span>
+                </div>
+            </div>
+
+            <!-- Item 3 — Telco -->
+            <div class="sms-list-item">
+                <div class="sms-list-avatar avatar-telco">📡</div>
+                <div class="sms-list-content">
+                    <div class="sms-list-name">TELCO-ID</div>
+                    <div class="sms-list-preview">Kuota Anda tersisa 2GB. Segera isi ulang!</div>
+                </div>
+                <div class="sms-list-meta">
+                    <span class="sms-list-time">Sen</span>
+                </div>
+            </div>
+
+            <!-- Item 4 — Teman -->
+            <div class="sms-list-item">
+                <div class="sms-list-avatar avatar-friend">👤</div>
+                <div class="sms-list-content">
+                    <div class="sms-list-name">Andi</div>
+                    <div class="sms-list-preview">Oke bro, nanti aku kabarin ya</div>
+                </div>
+                <div class="sms-list-meta">
+                    <span class="sms-list-time">Min</span>
+                </div>
+            </div>
+
+            <!-- Item 5 -->
+            <div class="sms-list-item">
+                <div class="sms-list-avatar" style="background:linear-gradient(135deg,#8e44ad,#9b59b6);">🛒</div>
+                <div class="sms-list-content">
+                    <div class="sms-list-name">TokoBelanja</div>
+                    <div class="sms-list-preview">Pesanan #TB8821 sedang dikirim ke alamat Anda</div>
+                </div>
+                <div class="sms-list-meta">
+                    <span class="sms-list-time">Min</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+         SCREEN 2 — CHAT SMS
+    ============================================================ -->
+    <div id="screen-sms-chat" class="screen">
+        <div class="status-bar dark">
+            <span class="status-time" id="clock2">09:41</span>
+            <div class="status-icons"><span>▲</span><span>WiFi</span><span>🔋</span></div>
+        </div>
+
+        <div class="chat-header">
+            <span class="chat-back" onclick="backToList()">‹</span>
+            <div class="chat-header-avatar avatar-gift">🎁</div>
+            <div class="chat-header-info">
+                <h3>Hadiah Spesial</h3>
+                <span>+62-800-HADIAH</span>
+            </div>
+        </div>
+
+        <div class="chat-body" id="chat-body">
+            <div class="chat-date-label">Hari ini</div>
+
+            <!-- Pesan awal -->
+            <div class="bubble received">
+                Selamat datang! Anda terpilih sebagai pemenang undian spesial kami! 🎉
+                <span class="btime">09:38</span>
+            </div>
+        </div>
+
+        <!-- Notifikasi container (download + transaksi) -->
+        <div class="notif-container" id="notif-container">
+
+            <!-- Notif Download -->
+            <div class="notif-card" id="notif-dl">
+                <div class="notif-app-icon notif-icon-dl">📥</div>
+                <div class="notif-content">
+                    <div class="notif-app-name">Pengunduhan</div>
+                    <div class="notif-title">AppHadiah.apk</div>
+                    <div class="notif-body">Sedang mengunduh aplikasi...</div>
+                    <div class="dl-progress"><div class="dl-bar" id="dl-bar"></div></div>
+                </div>
+                <div class="notif-time">Baru</div>
+            </div>
+
+            <!-- Notif Transaksi 1 -->
+            <div class="notif-card" id="notif-tx1" onclick="goToBank(event)">
+                <div class="notif-app-icon notif-icon-bank">🏦</div>
+                <div class="notif-content">
+                    <div class="notif-app-name">MyBank Digital</div>
+                    <div class="notif-title">Transaksi Berhasil</div>
+                    <div class="notif-body" style="color:#ff3b30;font-weight:700;">- Rp 50.000.000</div>
+                </div>
+                <div class="notif-time">Baru</div>
+            </div>
+
+            <!-- Notif Transaksi 2 -->
+            <div class="notif-card" id="notif-tx2" onclick="goToBank(event)">
+                <div class="notif-app-icon notif-icon-bank">🏦</div>
+                <div class="notif-content">
+                    <div class="notif-app-name">MyBank Digital</div>
+                    <div class="notif-title">Transaksi Berhasil</div>
+                    <div class="notif-body" style="color:#ff3b30;font-weight:700;">- Rp 43.000.000</div>
+                </div>
+                <div class="notif-time">Baru</div>
+            </div>
+
+        </div>
+
+        <!-- Secret zone kanan bawah -->
+        <div id="secret-zone" onclick="triggerTransactions(event)"></div>
+    </div>
+
+    <!-- ============================================================
+         SCREEN 3 — BANK
+    ============================================================ -->
+    <div id="screen-bank" class="screen">
+        <div class="bank-top">
+            <div class="status-bar light" style="padding:10px 4px 6px; background:transparent;">
+                <span class="status-time" id="clock3">09:41</span>
+                <div class="status-icons" style="color:#fff;"><span>▲</span><span>WiFi</span><span>🔋</span></div>
+            </div>
+
+            <div class="bank-topbar">
+                <div class="bank-logo-wrap">
+                    <div class="bank-logo-box">🏦</div>
+                    <span>MyBank</span>
+                </div>
+                <div class="bank-topbar-icons">
+                    <span>🔔</span>
+                    <span>👤</span>
+                </div>
+            </div>
+
+            <div class="bank-greeting-text">Selamat datang kembali,</div>
+            <div class="bank-user-name">B*** S****</div>
+
+            <div class="balance-card">
+                <div class="balance-label-text">
+                    <span>Saldo Rekening Utama</span>
+                    <span class="balance-eye">👁</span>
+                </div>
+                <div class="balance-amount-big">Rp 0</div>
+                <div class="balance-sub">No. Rek: <span>1234-5678-9012</span></div>
+            </div>
+        </div>
+
+        <div class="bank-body">
+            <div class="bank-quick-menu">
+                <div class="bqm-item"><div class="bqm-icon">💸</div><p>Transfer</p></div>
+                <div class="bqm-item"><div class="bqm-icon">📱</div><p>Top Up</p></div>
+                <div class="bqm-item"><div class="bqm-icon">🧾</div><p>Bayar</p></div>
+                <div class="bqm-item"><div class="bqm-icon">⋯</div><p>Lainnya</p></div>
+            </div>
+
+            <div class="section-title">Riwayat Transaksi</div>
+            <div class="tx-list">
+                <div class="tx-item">
+                    <div class="tx-ico out">⬆️</div>
+                    <div class="tx-detail">
+                        <h4>Transfer Keluar</h4>
+                        <p>Hari ini • 09:41</p>
+                    </div>
+                    <div class="tx-val out">−Rp 43.000.000</div>
+                </div>
+                <div class="tx-item">
+                    <div class="tx-ico out">⬆️</div>
+                    <div class="tx-detail">
+                        <h4>Transfer Keluar</h4>
+                        <p>Hari ini • 09:40</p>
+                    </div>
+                    <div class="tx-val out">−Rp 50.000.000</div>
+                </div>
+                <div class="tx-item">
+                    <div class="tx-ico inc">⬇️</div>
+                    <div class="tx-detail">
+                        <h4>Gaji Masuk</h4>
+                        <p>Kemarin • 08:00</p>
+                    </div>
+                    <div class="tx-val inc">+Rp 93.000.000</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Warning muncul di bank screen -->
+        <div id="warning-overlay" onclick="closeWarning()">
+            <div class="warning-box" onclick="event.stopPropagation()">
+                <div class="warn-icon">⚠️</div>
+                <div class="warn-title">INI ADALAH SIMULASI!</div>
+                <div class="warn-body">
+                    Konten ini dibuat khusus untuk <strong>edukasi dan sosialisasi</strong> modus penipuan digital yang nyata terjadi di masyarakat.
+                </div>
+                <div class="warn-tips">
+                    <p>🚫 Jangan pernah lakukan ini:</p>
+                    <ul>
+                        <li>❌ <span>Klik link dari SMS tidak dikenal</span></li>
+                        <li>❌ <span>Install APK dari luar toko resmi</span></li>
+                        <li>❌ <span>Berikan akses ke akun bank Anda</span></li>
+                        <li>❌ <span>Percaya hadiah tanpa verifikasi resmi</span></li>
+                    </ul>
+                </div>
+                <button class="warn-btn" onclick="closeWarning()">✅ Saya Mengerti & Waspada</button>
+            </div>
+        </div>
+    </div>
+
+</div><!-- end phone-frame -->
+
+<script>
+    // ===== STATE =====
+    let chatStep = 0;
+    // 0 = belum buka chat
+    // 1 = chat terbuka, belum ada bubble penipuan
+    // 2 = bubble penipuan muncul, belum klik link
+    // 3 = link diklik (download notif), belum trigger transaksi
+    // 4 = transaksi muncul
+
+    // ===== CLOCK =====
+    function updateClock() {
+        const now = new Date();
+        const t = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+        ['clock1','clock2','clock3'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = t;
+        });
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
+
+    // ===== HINT =====
+    function setHint(text) {
+        document.getElementById('hint').textContent = text;
+    }
+
+    // ===== SCREEN SWITCH =====
+    function showScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+
+    // ===== BACK TO LIST =====
+    function backToList() {
+        showScreen('screen-sms-list');
+        setHint('📋 Daftar SMS — klik "Hadiah Spesial" untuk buka pesan');
+    }
+
+    // ===== OPEN CHAT =====
+    function openChat() {
+        showScreen('screen-sms-chat');
+        chatStep = 1;
+        setHint('💬 Chat terbuka — klik layar untuk lihat pesan masuk');
+
+        // Tandai sudah dibaca di list
+        const item = document.getElementById('item-hadiah');
+        item.classList.remove('unread');
+        item.querySelector('.unread-dot')?.remove();
+    }
+
+    // ===== KLIK LAYAR CHAT =====
+    document.getElementById('screen-sms-chat').addEventListener('click', function(e) {
+        // Jangan trigger kalau klik notif atau secret zone
+        if (e.target.closest('#notif-container') || e.target.closest('#secret-zone') || e.target.closest('.chat-back')) return;
+
+        if (chatStep === 1) {
+            showScamBubble();
+            chatStep = 2;
+            setHint('🔗 Pesan masuk! Klik link "claim disini" di dalam pesan');
+        }
+    });
+
+    // ===== TAMPILKAN BUBBLE PENIPUAN =====
+    function showScamBubble() {
+        const body = document.getElementById('chat-body');
+
+        // Typing indicator
+        const typing = document.createElement('div');
+        typing.className = 'typing-indicator';
+        typing.id = 'typing-el';
+        typing.innerHTML = `<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>`;
+        body.appendChild(typing);
+        body.scrollTop = body.scrollHeight;
+
+        setTimeout(() => {
+            document.getElementById('typing-el')?.remove();
+
+            const b = document.createElement('div');
+            b.className = 'bubble received';
+            b.innerHTML = `
+                🎊 <strong>SELAMAT!</strong> Anda memenangkan <strong>Hadiah Spesial</strong> senilai
+                <strong>Rp 100.000.000</strong> dari Program Undian Nasional kami!<br><br>
+                Hadiah akan hangus dalam <strong>24 jam</strong>. Segera klaim sekarang!<br><br>
+                Claim disini: <span class="claim-link" onclick="claimClicked(event)">bit.ly/klaim-hadiah-spesial ↗</span>
+                <span class="btime">09:39</span>
+            `;
+            body.appendChild(b);
+            body.scrollTop = body.scrollHeight;
+        }, 2000);
+    }
+
+    // ===== KLIK LINK CLAIM =====
+    function claimClicked(e) {
+        e.stopPropagation();
+        if (chatStep !== 2) return;
+        chatStep = 3;
+
+        // Tampilkan notif download
+        const notifDl = document.getElementById('notif-dl');
+        notifDl.classList.add('visible');
+
+        // Animasi progress bar
+        setTimeout(() => {
+            document.getElementById('dl-bar').style.width = '100%';
+        }, 100);
+
+        // Update teks setelah selesai download
+        setTimeout(() => {
+            notifDl.querySelector('.notif-body').textContent = '✅ Unduhan selesai! AppHadiah.apk tersimpan.';
+        }, 3200);
+
+        // Bubble balasan
+        setTimeout(() => {
+            const body = document.getElementById('chat-body');
+            const b = document.createElement('div');
+            b.className = 'bubble received';
+            b.innerHTML = `✅ Aplikasi berhasil diinstal! Buka untuk klaim hadiah Anda sekarang.
+                <span class="btime">09:40</span>`;
+            body.appendChild(b);
+            body.scrollTop = body.scrollHeight;
+            setHint('📲 Aplikasi terunduh — klik pojok kanan bawah layar untuk lanjut');
+        }, 3500);
+    }
+
+    // ===== SECRET ZONE — TRIGGER TRANSAKSI =====
+    function triggerTransactions(e) {
+        e.stopPropagation();
+        if (chatStep !== 3) return;
+        chatStep = 4;
+
+        const tx1 = document.getElementById('notif-tx1');
+        const tx2 = document.getElementById('notif-tx2');
+
+        // Sembunyikan notif download dulu
+        document.getElementById('notif-dl').style.display = 'none';
+
+        // Notif transaksi 1
+        tx1.classList.add('visible');
+
+        // Notif transaksi 2 muncul setelah jeda
+        setTimeout(() => {
+            tx2.classList.add('visible');
+        }, 1300);
+
+        setHint('🔔 Notifikasi transaksi muncul! Klik salah satu untuk lihat saldo');
+    }
+
+    // ===== GO TO BANK =====
+    function goToBank(e) {
+        e.stopPropagation();
+        showScreen('screen-bank');
+        setHint('🏦 Saldo Rp 0 — klik layar untuk pesan edukasi');
+
+        // Klik di bank screen → warning
+        document.getElementById('screen-bank').addEventListener('click', showWarning, { once: true });
+    }
+
+    // ===== WARNING =====
+    function showWarning() {
+        document.getElementById('warning-overlay').classList.add('show');
+        setHint('⚠️ Simulasi selesai!');
+    }
+
+    function closeWarning() {
+        document.getElementById('warning-overlay').classList.remove('show');
+
+        // Reset semua ke awal
+        setTimeout(() => {
+            resetAll();
+        }, 400);
+    }
+
+    // ===== RESET =====
+    function resetAll() {
+        chatStep = 0;
+
+        // Reset notif
+        ['notif-dl','notif-tx1','notif-tx2'].forEach(id => {
+            const el = document.getElementById(id);
+            el.classList.remove('visible');
+            el.style.display = '';
+        });
+        document.getElementById('dl-bar').style.width = '0%';
+
+        // Reset chat body
+        const body = document.getElementById('chat-body');
+        body.innerHTML = `
+            <div class="chat-date-label">Hari ini</div>
+            <div class="bubble received">
+                Selamat datang! Anda terpilih sebagai pemenang undian spesial kami! 🎉
+                <span class="btime">09:38</span>
+            </div>
+        `;
+
+        // Reset unread di list
+        const item = document.getElementById('item-hadiah');
+        item.classList.add('unread');
+        if (!item.querySelector('.unread-dot')) {
+            const dot = document.createElement('div');
+            dot.className = 'unread-dot';
+            item.querySelector('.sms-list-meta').appendChild(dot);
+        }
+
+        showScreen('screen-sms-list');
+        setHint('🔄 Simulasi diulang — klik "Hadiah Spesial" untuk mulai lagi');
+    }
+</script>
+</body>
+</html>
